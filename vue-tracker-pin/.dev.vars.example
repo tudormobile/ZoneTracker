@@ -1,0 +1,5 @@
+AUTH_PIN=change-me
+JWT_SECRET=change-me-to-a-long-random-secret
+PROXY_HEADER_SECRET=change-me-proxy-header-secret
+PROXY_HEADER_NAME=x-site-proxy-auth
+PROXY_TARGET_ORIGIN=change-me-upstream-origin

@@ -1,0 +1,22 @@
+{
+  "name": "vue-tracker-pin",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev --env development",
+    "start": "wrangler dev --env development",
+    "test": "vitest",
+    "cf-typegen": "wrangler types"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.12.4",
+    "@types/node": "^25.9.3",
+    "typescript": "^5.5.2",
+    "vitest": "~3.2.0",
+    "wrangler": "^4.101.0"
+  },
+  "dependencies": {
+    "jose": "^6.2.3"
+  }
+}
