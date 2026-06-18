@@ -1,0 +1,11 @@
+mode: ContinuousDeployment
+workflow: GitHubFlow/v1
+branches:
+  main:
+    increment: Patch
+  feature:
+    increment: Minor
+  release:
+    regex: ^releases?[\/-](?<version>\d+\.\d+\.\d+)$
+    label: 'rc'
+    increment: None
