@@ -1,11 +1,16 @@
 {
   "name": "vue-tracker",
+  "displayName": "Zone Tracker",
   "version": "0.0.0",
+  "license": "MIT",
+  "author": "Bill Tudor",
+  "copyright": "Copyright (c) 2026 Bill Tudor",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "gen-version": "node scripts/gen-version.js",
+    "build": "run-s gen-version type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build"

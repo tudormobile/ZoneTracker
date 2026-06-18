@@ -1,0 +1,126 @@
+name: Vue App
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'vue-tracker/**'
+      - '.github/workflows/web.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'vue-tracker/**'
+      - '.github/workflows/web.yml'
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  ci:
+    name: Build vue app
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: vue-tracker
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+
+    - name: Disable local .npmrc for CI
+      run: |
+        if [ -f .npmrc ]; then mv .npmrc .npmrc.local-ci; fi
+
+    - name: Setup GitVersion
+      uses: gittools/actions/gitversion/setup@v4
+      with:
+        versionSpec: '6.4.0'
+
+    - name: Determine Version
+      id: version_step
+      uses: gittools/actions/gitversion/execute@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: '24'
+        cache: 'npm'
+        cache-dependency-path: vue-tracker/package-lock.json
+        registry-url: 'https://npm.pkg.github.com'
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Install dependencies
+      run: npm ci
+          
+    - name: Build app
+      run: npm run build
+      env:
+        VITE_APP_VERSION: ${{ steps.version_step.outputs.semVer }}
+#        VITE_API_APP_NAME: ${{ vars.VITE_API_APP_NAME }}
+#        VITE_API_KEY_NAME: ${{ vars.VITE_API_KEY_NAME }}
+#        VITE_API_KEY_VALUE: ${{ secrets.VITE_API_KEY_VALUE }}
+#        VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+#        VITE_API_ADDITIONAL_HEADERS: ${{ secrets.VITE_API_ADDITIONAL_HEADERS }}
+
+    - name: Create zip archive
+      run: |
+        cd dist
+        zip -r "$GITHUB_WORKSPACE/vue-tracker-dist.zip" .
+        
+    - name: Upload dist artifact
+      uses: actions/upload-artifact@v6
+      with:
+        name: vue-tracker-dist
+        path: vue-tracker-dist.zip
+        retention-days: 30
+
+  release:
+    name: Create release
+    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
+    needs: ci
+    runs-on: ubuntu-latest
+    environment: production-release
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Disable local .npmrc for CI
+        run: |
+          if [ -f .npmrc ]; then mv .npmrc .npmrc.local-ci; fi
+      - name: Setup GitVersion
+        uses: gittools/actions/gitversion/setup@v4
+        with:
+          versionSpec: '6.4.0'
+
+      - name: Determine Version
+        id: version_step
+        uses: gittools/actions/gitversion/execute@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: vue-tracker/package-lock.json
+          registry-url: 'https://npm.pkg.github.com'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download dist artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: vue-tracker-dist
+          path: vue-tracker-dist
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create -t "v${{ steps.version_step.outputs.semVer }}-web" --generate-notes "v${{ steps.version_step.outputs.semVer }}-web" vue-tracker-dist/vue-tracker-dist.zip#package
