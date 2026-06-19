@@ -1,5 +1,6 @@
 # ZoneTracker
-GPS Fitness Activity Tracker
+GPS Fitness Activity Tracker  
+
 [![Vue App](https://github.com/tudormobile/ZoneTracker/actions/workflows/web.yml/badge.svg)](https://github.com/tudormobile/ZoneTracker/actions/workflows/web.yml)
 
 ## Project Structure
