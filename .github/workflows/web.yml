@@ -124,3 +124,52 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create -t "v${{ steps.version_step.outputs.semVer }}-web" --generate-notes "v${{ steps.version_step.outputs.semVer }}-web" vue-tracker-dist/vue-tracker-dist.zip#package
+
+  deploy:
+    name: Deploy vue app to Cloudflare
+    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
+    needs: release
+    runs-on: ubuntu-latest
+    environment: production-deploy
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Disable local .npmrc for CI
+        run: |
+          if [ -f .npmrc ]; then mv .npmrc .npmrc.local-ci; fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: vue-tracker/package-lock.json
+          registry-url: 'https://npm.pkg.github.com'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install vue-tracker dependencies
+        run: npm ci
+        working-directory: vue-tracker
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: vue-tracker-dist
+          path: vue-tracker-dist
+
+      - name: Unpack dist artifact
+        run: |
+          mkdir -p deploy-dist
+          unzip -q vue-tracker-dist/vue-tracker-dist.zip -d deploy-dist
+
+      - name: Deploy to Cloudflare Pages
+        run: npx --prefix vue-tracker wrangler pages deploy deploy-dist --project-name "${{ vars.CLOUDFLARE_PAGES_PROJECT }}" --branch "main"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
