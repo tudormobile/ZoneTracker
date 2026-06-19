@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { version as pkgVersion, name as appName, displayName as appDisplayName } from '../package.json'
 
 type ActivityStatus = 'initial' | 'pending' | 'complete'
 
@@ -555,8 +556,8 @@ onBeforeUnmount(() => {
 <template>
   <main class="app-shell">
     <section class="card">
-      <h1>ZoneTracker</h1>
-      <p class="subtle">Simple local GPS activity tracker</p>
+      <h1>{{appDisplayName}}</h1>
+      <p class="subtle">Simple local GPS activity tracker v{{pkgVersion}}</p>
 
       <div class="form-grid">
         <label>
