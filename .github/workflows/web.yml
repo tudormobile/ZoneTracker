@@ -123,6 +123,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          TAG="v${{ steps.version_step.outputs.semVer }}"
+          git tag "$TAG"
+          git push origin "$TAG"
           gh release create -t "v${{ steps.version_step.outputs.semVer }}-web" --generate-notes "v${{ steps.version_step.outputs.semVer }}-web" vue-tracker-dist/vue-tracker-dist.zip#package
 
   deploy:
