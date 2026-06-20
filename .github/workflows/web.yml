@@ -169,7 +169,7 @@ jobs:
           unzip -q vue-tracker-dist/vue-tracker-dist.zip -d deploy-dist
 
       - name: Deploy static app via Cloudflare Worker
-        run: npx --prefix vue-tracker wrangler deploy --config vue-tracker/wrangler.jsonc --assets deploy-dist --commit-dirty=true
+        run: npx --prefix vue-tracker wrangler deploy --config vue-tracker/wrangler.jsonc --assets deploy-dist
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
