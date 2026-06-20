@@ -120,9 +120,9 @@ Key behavior:
 - Downloads `vue-tracker-dist` artifact
 - Unzips artifact into `deploy-dist`
 - Deploys static assets via Wrangler Worker deploy:
-  - `wrangler deploy --config vue-tracker/wrangler.jsonc --assets deploy-dist --commit-dirty=true`
+  - `wrangler deploy --config vue-tracker/wrangler.jsonc --assets deploy-dist`
 - Uses Worker static asset routing defined in `wrangler.jsonc`:
-  - `assets.directory`: static content root
+  - `assets.directory`: default static content root (overridden to `deploy-dist` in CI via `--assets`)
   - `assets.not_found_handling: single-page-application`: Vue Router fallback to `index.html`
 
 Required GitHub configuration:
