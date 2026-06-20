@@ -25,7 +25,7 @@ The workflow has three jobs:
 
 1. `ci` (build and package)
 2. `release` (create GitHub release)
-3. `deploy` (deploy to Cloudflare Pages)
+3. `deploy` (deploy static app via Cloudflare Worker)
 
 Execution flow:
 
@@ -91,7 +91,7 @@ Key behavior:
 
 Purpose:
 
-- Deploy the previously built artifact to Cloudflare Pages.
+- Deploy the previously built artifact as static assets via Cloudflare Worker.
 
 Runs when:
 
@@ -118,20 +118,21 @@ Key behavior:
 - Sets up Node.js 24
 - Installs `vue-tracker` dependencies
 - Downloads `vue-tracker-dist` artifact
-- Unzips artifact into `deploy-dist`
-- Deploys to Cloudflare Pages using Wrangler:
-  - `wrangler pages deploy deploy-dist --project-name "${{ vars.CLOUDFLARE_PAGES_PROJECT }}" --branch "main"`
+- Unzips artifact into `vue-tracker/dist`
+- Deploys static assets via Wrangler Worker deploy:
+  - `wrangler deploy --config vue-tracker/wrangler.jsonc`
+- Uses Worker static asset routing defined in `wrangler.jsonc`:
+  - `assets.directory`: static content root used by deploy (`dist`)
+  - `assets.not_found_handling: single-page-application`: Vue Router fallback to `index.html`
 
 Required GitHub configuration:
 
 - Secrets:
   - `CLOUDFLARE_API_TOKEN`
   - `CLOUDFLARE_ACCOUNT_ID`
-- Variable:
-  - `CLOUDFLARE_PAGES_PROJECT`
 
 ## Related Project Files
 
 - `.github/workflows/web.yml`
 - `vue-tracker/package.json` (Wrangler scripts and dependency)
-- `vue-tracker/wrangler.jsonc` (Wrangler/Pages config)
+- `vue-tracker/wrangler.jsonc` (Wrangler Worker static assets config)
