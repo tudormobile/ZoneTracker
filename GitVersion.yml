@@ -9,3 +9,5 @@ branches:
     regex: ^releases?[\/-](?<version>\d+\.\d+\.\d+)$
     label: 'rc'
     increment: None
+  unknown:
+    increment: Patch
