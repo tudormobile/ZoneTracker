@@ -121,7 +121,7 @@ jobs:
           echo "BranchName=${{ steps.version_step.outputs.branchName }}"
           echo "Sha=${{ steps.version_step.outputs.sha }}"
           echo "VersionSourceSha=${{ steps.version_step.outputs.versionSourceSha }}"
-          echo "CommitsSinceVersionSource=${{ steps.version_step.outputs.commitsSinceVersionSource }}"        
+          echo "CommitsSinceVersionSource=${{ steps.version_step.outputs.commitsSinceVersionSource }}"
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
