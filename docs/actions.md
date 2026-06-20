@@ -118,11 +118,11 @@ Key behavior:
 - Sets up Node.js 24
 - Installs `vue-tracker` dependencies
 - Downloads `vue-tracker-dist` artifact
-- Unzips artifact into `deploy-dist`
+- Unzips artifact into `vue-tracker/dist`
 - Deploys static assets via Wrangler Worker deploy:
-  - `wrangler deploy --config vue-tracker/wrangler.jsonc --assets deploy-dist`
+  - `wrangler deploy --config vue-tracker/wrangler.jsonc`
 - Uses Worker static asset routing defined in `wrangler.jsonc`:
-  - `assets.directory`: default static content root (overridden to `deploy-dist` in CI via `--assets`)
+  - `assets.directory`: static content root used by deploy (`dist`)
   - `assets.not_found_handling: single-page-application`: Vue Router fallback to `index.html`
 
 Required GitHub configuration:
