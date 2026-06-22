@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { version as pkgVersion, name as appName, displayName as appDisplayName } from '../package.json'
+import TrackingSettings from './components/TrackingSettings.vue'
+import TrackingControlsStatus from './components/TrackingControlsStatus.vue'
 
 type ActivityStatus = 'initial' | 'pending' | 'complete'
 
@@ -45,7 +47,7 @@ const ACTIVE_POINTS_STORE = 'active_points'
 const COMPLETED_ACTIVITIES_STORE = 'completed_activities'
 
 const sampleIntervalSeconds = ref(5)
-const maxDurationHours = ref(10)
+const maxDurationHours = ref(4)
 const tracking = ref(false)
 const activityId = ref('')
 const startedAtMs = ref<number | null>(null)
@@ -534,13 +536,6 @@ function formatPointTs(ts: number): string {
   return new Date(ts).toLocaleString()
 }
 
-function formatElapsed(seconds: number): string {
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const secs = seconds % 60
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
-}
-
 onMounted(async () => {
   await ensurePermissionState()
   await refreshSummaries()
@@ -559,50 +554,24 @@ onBeforeUnmount(() => {
       <h1>{{appDisplayName}}</h1>
       <p class="subtle">Simple local GPS activity tracker v{{pkgVersion}}</p>
 
-      <div class="form-grid">
-        <label>
-          <span>Sample interval (seconds)</span>
-          <input v-model.number="sampleIntervalSeconds" type="number" min="1" :disabled="tracking" />
-        </label>
+      <TrackingSettings
+        v-model:sample-interval-seconds="sampleIntervalSeconds"
+        v-model:max-duration-hours="maxDurationHours"
+        :tracking="tracking"
+      />
 
-        <label>
-          <span>Max duration (hours)</span>
-          <input
-            v-model.number="maxDurationHours"
-            type="number"
-            min="0.1"
-            step="0.1"
-            :disabled="tracking"
-          />
-        </label>
-      </div>
-
-      <div class="row">
-        <button type="button" class="button secondary" @click="requestLocationPermission" :disabled="tracking">
-          Enable Location Access
-        </button>
-      </div>
-
-      <div class="row buttons">
-        <button type="button" class="button primary" @click="startTracking" :disabled="tracking">Start</button>
-        <button type="button" class="button danger" @click="stopTracking()" :disabled="!tracking">Stop</button>
-      </div>
-
-      <div class="status">
-        <p><strong>Permission:</strong> {{ permissionState }}</p>
-        <p><strong>Status:</strong> {{ statusMessage }}</p>
-        <p><strong>Active activity:</strong> {{ activityId || 'none' }}</p>
-        <p><strong>Elapsed:</strong> {{ formatElapsed(elapsedSeconds) }}</p>
-        <p><strong>Points captured:</strong> {{ pointsCaptured }}</p>
-      </div>
-
-      <div v-if="lastPoint" class="status">
-        <p>
-          <strong>Last point:</strong>
-          {{ lastPoint.lat.toFixed(6) }}, {{ lastPoint.lon.toFixed(6) }}
-        </p>
-        <p><strong>Accuracy:</strong> {{ lastPoint.acc ?? 'n/a' }} m</p>
-      </div>
+      <TrackingControlsStatus
+        :tracking="tracking"
+        :permission-state="permissionState"
+        :status-message="statusMessage"
+        :activity-id="activityId"
+        :elapsed-seconds="elapsedSeconds"
+        :points-captured="pointsCaptured"
+        :last-point="lastPoint"
+        @request-location-permission="requestLocationPermission"
+        @start-tracking="startTracking"
+        @stop-tracking="stopTracking()"
+      />
     </section>
 
     <section class="card">
